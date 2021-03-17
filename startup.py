@@ -67,16 +67,26 @@ class InstallGUI:
             self.continue_button["state"] = NORMAL
         elif self.page_state == 1:
             self.top_label.destroy()
-            self.description_label.destroy()
-            self.render_second_page()
-            self.back_button["state"] = NORMAL
+            self.requirements.destroy()
+
+            if self.check_requirments():
+               self.description_label.configure(text="missing packages")
+            else:
+                self.description_label.destroy()
+                self.render_second_page()
+                self.back_button["state"] = NORMAL
+
             self.continue_button["state"] = DISABLED
+
         elif self.page_state == 2:
             self.description_label.destroy()
             self.install_choice.destroy()
             self.top_label.destroy()
             self.back_button["state"] = DISABLED
             self.continue_button["state"] = DISABLED
+
+            self.master.update_idletasks()
+            time.sleep(1)
             self.install()
         elif self.page_state == 3:
             #run thonny
@@ -98,7 +108,9 @@ class InstallGUI:
         
         self.description_label.pack()
         self.description_label.place(relx= .5, rely = .5, anchor=CENTER)
-        requirements = "\nRequirements:\n \t*git\n \t*python3\n \t*pip" #\\TODO: make label for these
+        requirements = "\nRequirements:\n - git\n - python3\n - pip" 
+        self.requirements = Label(self.master, text=requirements, font="Helvetica 12", justify=LEFT)
+        self.requirements.place(relx= .5, rely = .7, anchor=CENTER)
 
     def render_second_page(self):
         def change_dropdown(*args):
@@ -136,11 +148,19 @@ class InstallGUI:
         self.install_choice = OptionMenu(self.master, dropdown_var, *choices)
         self.install_choice.grid(row=2, column=2)
 
-       
+    #TODO: check for missing requirements
+    def check_requirments(self):
+        missing_requirments = None
+        if sys.platform == "linux":
+            print("cheking linux")
+        else:
+            print("checking windows")
+
+        return missing_requirments
     def install(self):
         self.progress = Progressbar(self.master, orient = HORIZONTAL, length= 100, mode='determinate')
         self.progress.place(relx= .5, rely = .5, anchor=CENTER)
-        self.progress['value'] = 0
+        self.progress['value'] = 3
         self.master.update_idletasks()
 
         if self.install_method == "full":
