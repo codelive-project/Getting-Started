@@ -6,6 +6,7 @@ import sys
 import time
 import subprocess
 
+
 def install_package(package):
     if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         os.system('sudo pacman -S ' +  package)
@@ -23,6 +24,9 @@ except ImportError:
     from tkinter import filedialog
     from tkinter import *
     from tkinter.ttk import Progressbar
+
+
+
 
 class InstallGUI:
     def __init__(self, master):
@@ -89,14 +93,13 @@ class InstallGUI:
             self.description_label.destroy()
             self.install_choice.destroy()
             self.top_label.destroy()
-            self.back_button["state"] = NORMAL
+            self.back_button["state"] = DISABLED
             self.continue_button["state"] = DISABLED
 
             self.master.update_idletasks()
             self.start_download = Button(self.master, text="Start Download", command=self.install, font= "Helvetica")
             self.start_download.place(relx= .5, rely = .5, anchor=CENTER)
-            #time.sleep(1)
-           # self.install()
+
         elif self.page_state == 3:
             #run thonny
             path = os.path.dirname(self.target_dir)
@@ -124,20 +127,22 @@ class InstallGUI:
     def render_second_page(self):
         def change_dropdown(*args):
            choice = dropdown_var.get()
+           message = "***"
            if  choice != '':
                if choice == "existing version of thonny":
-                    path = filedialog.askdirectory(initialdir="/", title="Choose your Thonny folder")
-                    plugin_folder = os.path.join(path, "plugins")
-                    
-                    #confirm user chose valid folder
-                    if os.path.exists(plugin_folder) and path.find("thonny") != -1:
-                        self.target_dir = path
-                        self.install_method="partial"
-                    else:
+                    try:
+                       import thonny
+                       self.target_dir = os.path.dirname(thonny.__file__)
+                       self.install_method="partial"
+                    except ModuleNotFoundError:
+                        print("oopsie")
                         self.target_dir = ''
+                        message = "thonny is not installed on your device. "
+                       
                else:
                    self.target_dir = filedialog.askdirectory(initialdir="/", title="Choose where to save Thonny")
                    self.install_method = "full"
+                   message = "bad file location. "
                    
            #prevent user from continuing without choice
            if self.target_dir != () and self.target_dir != '':
@@ -146,7 +151,7 @@ class InstallGUI:
            else:
                self.continue_button["state"] = DISABLED
                self.install_method = "TBD"
-               self.top_label.configure(text="Invalid Selection. Try again", fg="red")
+               self.top_label.configure(text="Invalid Selection: " + message + "Try again", fg="red")
                dropdown_var.set('')
                
         #set top label
@@ -165,6 +170,16 @@ class InstallGUI:
         dropdown_var.trace("w", change_dropdown)
         self.install_choice = OptionMenu(self.master, dropdown_var, *choices)
         self.install_choice.grid(row=2, column=2)
+
+    #modifying thonny file may require this
+    def get_root_access(self):
+        try:
+            from elevate import elevate
+        except ModuleNotFoundError:
+            os.system("pip install elevate")
+            from elevate import elevate
+        print("you don't have permission to install your file here")
+       # elevate()
 
     def check_requirments(self):
         missing_requirments = []
@@ -192,6 +207,8 @@ class InstallGUI:
         self.progress.place(relx= .5, rely = .5, anchor=CENTER)
         self.progress['value'] = 3
         self.master.update_idletasks()
+
+        
 
         if self.install_method == "full":
             #clone thonny repo
@@ -228,7 +245,12 @@ class InstallGUI:
         self.master.update_idletasks()
 
         #install codelive plugin
-        os.mkdir(path)
+        try:
+            os.mkdir(path)
+        except PermissionError:
+            self.get_root_access()
+            os.mkdir()
+
         os.system("git clone https://github.com/codelive-project/codelive " + path)
         self.progress['value'] = 75
         self.master.update_idletasks()
