@@ -30,6 +30,9 @@ class InstallGUI:
         master.geometry('600x400')
         master.title("Co-Pilot Instalation Wizard")
 
+        # some systems python3 commandline variable is stored as python
+        self.python_cmd = 'python3' 
+
         #start up first page
         self.render_first_page()
 
@@ -61,13 +64,13 @@ class InstallGUI:
         if self.page_state == 0:
             self.description_label.destroy()
             self.install_choice.destroy()
+            self.top_label.destroy()
             self.render_first_page()
             self.target_dir = ''
             self.install_method = 'TBD'
             self.back_button["state"] = DISABLED
             self.continue_button["state"] = NORMAL
-            # some systems python3 commandline variable is stored as python
-            self.python_cmd = 'python3' 
+            
         elif self.page_state == 1:
             self.top_label.destroy()
             self.requirements.destroy()
@@ -123,8 +126,15 @@ class InstallGUI:
            choice = dropdown_var.get()
            if  choice != '':
                if choice == "existing version of thonny":
-                   self.install_method="partial"
-                   self.target_dir = filedialog.askdirectory(initialdir="/", title="Choose your Thonny folder")
+                    path = filedialog.askdirectory(initialdir="/", title="Choose your Thonny folder")
+                    plugin_folder = os.path.join(path, "plugins")
+                    
+                    #confirm user chose valid folder
+                    if os.path.exists(plugin_folder) and path.find("thonny") != -1:
+                        self.target_dir = path
+                        self.install_method="partial"
+                    else:
+                        self.target_dir = ''
                else:
                    self.target_dir = filedialog.askdirectory(initialdir="/", title="Choose where to save Thonny")
                    self.install_method = "full"
@@ -132,15 +142,17 @@ class InstallGUI:
            #prevent user from continuing without choice
            if self.target_dir != () and self.target_dir != '':
                self.continue_button["state"] = NORMAL
+               self.top_label.configure(text="Valid Selection", fg="green")
            else:
                self.continue_button["state"] = DISABLED
                self.install_method = "TBD"
+               self.top_label.configure(text="Invalid Selection. Try again", fg="red")
                dropdown_var.set('')
                
         #set top label
         self.top_label = Label(self.master, text="Select a option:", font="Helvetica 12")
         self.top_label.pack()
-        self.top_label.place(relx= .5, rely = .2, anchor=CENTER)
+        self.top_label.place(relx= .5, rely = .4, anchor=CENTER)
 
         #set description
         self.description_label = Label(self.master, text="I would like to install CodeLive on a", font="Helvetica 12")
@@ -159,6 +171,7 @@ class InstallGUI:
         requirements = ['git', 'pip', 'python3']
         for package in requirements:
             if os.system(package + ' --version') != 0:
+
                 # some systems python3 commandline variable is stored as python
                 if package == 'python3':
                     ret = os.popen('python --version').read().find('Python 3')
