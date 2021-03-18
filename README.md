@@ -5,7 +5,9 @@
 #### Windows:
 #### Mac
 #### Linux
-### Existing Version of Thonny
+
+
+### With an existing Thonny Installation
 #### Windows:
 #### Mac
 #### Linux
