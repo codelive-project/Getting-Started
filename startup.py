@@ -1,12 +1,13 @@
 """
-simple gui to install Codelive in either existing or new Thonny distribution
+simple gui to install Copilot in either existing or new Thonny distribution
 """
 import os
 import sys
 import time
+import subprocess
 
 def install_package(package):
-    if sys.platform == "linux":
+    if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
         os.system('sudo pacman -S ' +  package)
     else:
         print("you need to enable", package, "for your version of python")
@@ -27,7 +28,7 @@ class InstallGUI:
     def __init__(self, master):
         self.master = master
         master.geometry('600x400')
-        master.title("Codelive Instalation Wizard")
+        master.title("Co-Pilot Instalation Wizard")
 
         #start up first page
         self.render_first_page()
@@ -65,12 +66,15 @@ class InstallGUI:
             self.install_method = 'TBD'
             self.back_button["state"] = DISABLED
             self.continue_button["state"] = NORMAL
+            # some systems python3 commandline variable is stored as python
+            self.python_cmd = 'python3' 
         elif self.page_state == 1:
             self.top_label.destroy()
             self.requirements.destroy()
 
-            if self.check_requirments():
-               self.description_label.configure(text="missing packages")
+            missing_requirments = self.check_requirments()
+            if missing_requirments:
+               self.description_label.configure(text="Missing packages: " + " ".join(missing_requirments),  fg='red')
             else:
                 self.description_label.destroy()
                 self.render_second_page()
@@ -82,19 +86,21 @@ class InstallGUI:
             self.description_label.destroy()
             self.install_choice.destroy()
             self.top_label.destroy()
-            self.back_button["state"] = DISABLED
+            self.back_button["state"] = NORMAL
             self.continue_button["state"] = DISABLED
 
             self.master.update_idletasks()
-            time.sleep(1)
-            self.install()
+            self.start_download = Button(self.master, text="Start Download", command=self.install, font= "Helvetica")
+            self.start_download.place(relx= .5, rely = .5, anchor=CENTER)
+            #time.sleep(1)
+           # self.install()
         elif self.page_state == 3:
             #run thonny
             path = os.path.dirname(self.target_dir)
             path = os.path.dirname(path)
             path = os.path.dirname(path)
             os.chdir(path)
-            os.system("python3 -m thonny")
+            os.system(self.python_cmd + " -m thonny")
             self.master.quit()
             
     def render_first_page(self):
@@ -148,17 +154,28 @@ class InstallGUI:
         self.install_choice = OptionMenu(self.master, dropdown_var, *choices)
         self.install_choice.grid(row=2, column=2)
 
-    #TODO: check for missing requirements
     def check_requirments(self):
-        missing_requirments = None
-        if sys.platform == "linux":
-            print("cheking linux")
-        else:
-            print("checking windows")
+        missing_requirments = []
+        requirements = ['git', 'pip', 'python3']
+        for package in requirements:
+            if os.system(package + ' --version') != 0:
+                # some systems python3 commandline variable is stored as python
+                if package == 'python3':
+                    ret = os.popen('python --version').read().find('Python 3')
+                    if ret == 0:
+                        self.python_cmd = 'python'
+                        continue
+                missing_requirments.append(package)
 
         return missing_requirments
+
     def install(self):
-        self.progress = Progressbar(self.master, orient = HORIZONTAL, length= 100, mode='determinate')
+        self.start_download.destroy()
+        self.back_button["state"] = DISABLED
+        
+        self.master.update_idletasks()
+
+        self.progress = Progressbar(self.master, orient = HORIZONTAL, length= 500, mode='determinate')
         self.progress.place(relx= .5, rely = .5, anchor=CENTER)
         self.progress['value'] = 3
         self.master.update_idletasks()
@@ -183,7 +200,7 @@ class InstallGUI:
             linux_cmd = "export " + cmd
 
             #handle multiple os
-            if sys.platform == "linux":
+            if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
                 os.system(linux_cmd)
             else:
                 os.system(windows_cmd)
