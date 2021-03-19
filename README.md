@@ -7,7 +7,7 @@
 #### Linux
 
 
-### With an existing Thonny Installation
+### With an existing Thonny Instillation
 #### Windows:
 #### Mac
 #### Linux
