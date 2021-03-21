@@ -2,9 +2,9 @@
 
 ## Installation
 #### Intalling Thonny:
-If you haven't installed Thonny yet, click [here](https://thonny.org). 
+If you haven't installed Thonny yet, you can download it [here](https://thonny.org). 
 Otherwise, skip this step
-### Installing 
+### Installing Co-pilot
 
 ## User Guide
 
