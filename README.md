@@ -8,11 +8,11 @@ To get started, download this repository like so
 
 ![Download zip](/resources/download_installer.png)
 
-<br/> Then, open your terminal and navigate to the directory where the repository was saved and run the enter the command: <br/>
+<br/><br/> Then, open your terminal and navigate to the directory where the repository was saved and run the enter the command: <br/><br/>
 *python3 startup.py*
-<br/>
+<br/><br/>
 This will launch an install wizard which walk you through the installation process. For the following example, the repository was saved in the *Downloads* folder.
-
+[Download zip](/resources/launch_wizard.png)
 ## User Guide
 
 ## FAQ
