@@ -1,4 +1,4 @@
-# Welcome to Co-pilot
+# Welcome to CodeLive
 
 ## Installation
 ### Installing CodeLive:
