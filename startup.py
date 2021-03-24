@@ -37,6 +37,8 @@ class InstallGUI:
         # some systems python3 commandline variable is stored as python
         self.python_cmd = 'python3' 
 
+        self.pip_cmd = 'pip'
+
         #start up first page
         self.render_first_page()
 
@@ -102,13 +104,58 @@ class InstallGUI:
 
         elif self.page_state == 3:
             #run thonny
-            path = os.path.dirname(self.target_dir)
-            path = os.path.dirname(path)
-            path = os.path.dirname(path)
-            os.chdir(path)
-            os.system(self.python_cmd + " -m thonny")
+            self.launch_thonny()
+            #os.system(self.python_cmd + " -m thonny")
             self.master.quit()
-            
+
+    def launch_thonny(self):
+        #navigate to desktop
+        desktop = ''
+        if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+            desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+        else:
+            desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop') 
+        os.chdir(desktop)
+        
+        #set up file path
+        path = os.path.join(self.target_dir, self.folder_name) # change name
+
+        #make shortuct
+        f= open("thonny-codelive","w+")
+        f.close()
+
+        #set up short cut
+        shortcut = f=open("thonny-codelive", "a+")
+        if sys.platform in ('win32', 'cygwin'):
+            shortcut.write('#!/bin/bash')
+
+        #set enviornment variable
+        path_to_plugin = os.path.join(path, self.plugin_name)
+        cmd =  "PYTHONPATH=" + path_to_plugin
+        windows_cmd = "set " + cmd
+        linux_cmd = "export " + cmd
+
+        #handle multiple os
+        if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+            shortcut.write(linux_cmd + '\n')
+        else:
+            shortcut.write(windows_cmd + '\n')
+
+        shortcut.write("cd " + path +'\n')
+        shortcut.write(self.python_cmd + " -m thonny")
+        shortcut.close()
+        os.system("cat thonny-codelive")
+
+        # make short cut executable
+        if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
+            os.system("chmod +x thonny-codelive")
+        else:
+            os.system("chmod u+x thonny-codelive")
+
+        # launch thonny
+        os.chdir(path)
+        (self.python_cmd + " -m thonny")
+
     def render_first_page(self):
          #render top lable
         self.top_label = Label(self.master, text="Welcome To CodeLive\n Install Wizard", font= "Helvetica 24 bold")
@@ -164,7 +211,8 @@ class InstallGUI:
         self.description_label.grid(row=2, column=1, pady=200)
 
         #dropdown to choose installation method
-        choices= {'existing version of thonny', 'new version thonny'}
+        #choices= {'existing version of thonny', 'new version thonny'}
+        choices= {'new version thonny'}
         dropdown_var = StringVar(self.master)
         dropdown_var.set('')
         dropdown_var.trace("w", change_dropdown)
@@ -176,10 +224,9 @@ class InstallGUI:
         try:
             from elevate import elevate
         except ModuleNotFoundError:
-            os.system("pip install elevate")
+            os.system(self.pip_cmd +" install elevate")
             from elevate import elevate
-        print("you don't have permission to install your file here")
-       # elevate()
+        elevate()
 
     def check_requirments(self):
         missing_requirments = []
@@ -192,6 +239,11 @@ class InstallGUI:
                     ret = os.popen('python --version').read().find('Python 3')
                     if ret == 0:
                         self.python_cmd = 'python'
+                        continue
+                if package == 'pip':
+                    ret = os.popen('pip3 --version').read().find('pip 21')
+                    if ret == 0:
+                        self.pip_cmd = 'pip3'
                         continue
                 missing_requirments.append(package)
 
@@ -208,11 +260,12 @@ class InstallGUI:
         self.progress['value'] = 3
         self.master.update_idletasks()
 
-        
+        self.plugin_name = 'thonny-codelive'
+        self.folder_name = 'CodeLiveThonny'
 
         if self.install_method == "full":
             #clone thonny repo
-            path = os.path.join(self.target_dir, "CopilotThonny")
+            path = os.path.join(self.target_dir, self.folder_name)
             os.mkdir(path)
             os.system("git clone https://github.com/thonny/thonny " + path)
             self.progress['value'] = 25
@@ -220,27 +273,10 @@ class InstallGUI:
             
             #install requirements
             os.chdir(path)
-            os.system("python3 -m pip install -r requirements.txt")
+            os.system("python3 -m " + self.pip_cmd +" install -r requirements.txt")
             
-            
-            #set enviornment variable
-            path = os.path.join(path, "thonny")
-            cmd =  "PYTHONPATH=" + path
-            windows_cmd = "set " + cmd
-            linux_cmd = "export " + cmd
 
-            #handle multiple os
-            if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-                os.system(linux_cmd)
-            else:
-                os.system(windows_cmd)
-
-            #navigate to plugins folder
-            path = os.path.join(path, "plugins", "codelive")
-        else:
-            #navigate to plugins folder
-            path = os.path.join(self.target_dir,"plugins","codelive")
-
+        path = os.path.join(self.target_dir, self.folder_name, self.plugin_name)
         self.progress['value'] =50
         self.master.update_idletasks()
 
@@ -249,14 +285,16 @@ class InstallGUI:
             os.mkdir(path)
         except PermissionError:
             self.get_root_access()
-            os.mkdir()
+            os.mkdir(path)
 
         os.system("git clone https://github.com/codelive-project/codelive " + path)
         self.progress['value'] = 75
         self.master.update_idletasks()
 
+
         #install requirements
-        os.system("pip install paho-mqtt")
+        os.system(self.pip_cmd + " install paho-mqtt")
+        os.system(self.pip_cmd + " install pyinstaller")
 
         self.progress['value'] = 99
         self.master.update_idletasks()
@@ -269,8 +307,6 @@ class InstallGUI:
         self.continue_button.configure(text="complete")
         self.continue_button["state"] = NORMAL
         self.continue_button.place(relx=.5, rely=.9)
-        self.target_dir = path
-    
             
             
         
