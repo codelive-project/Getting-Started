@@ -14,6 +14,7 @@ To get started, download this repository like so
 This will launch an install wizard which walk you through the installation process. For the following example, the repository was saved in the *Downloads* folder.
 
 <img src="/resources/launch_wizard.png" alt="drawing" width="500"/>
+
 ## User Guide
 
 ## FAQ
