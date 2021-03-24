@@ -6,7 +6,7 @@ We have set a up a script for you to simply install our plugin on a fresh versio
 
 To get started, download the this repository
 
-[Download zip](/resources/download_installer)
+[Download zip](/resources/download_installer.png)
 
 ## User Guide
 
