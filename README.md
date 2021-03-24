@@ -6,7 +6,7 @@ We have set a up a script for you to simply install our plugin on a fresh versio
 
 To get started, download this repository like so
 
-![Download zip](/resources/download_installer.png | width=100)
+<img src="/resources/download_installer.png" alt="drawing" width="200"/>
 
 <br/><br/> Then, open your terminal and navigate to the directory where the repository was saved and run the enter the command: <br/><br/>
 *python3 startup.py*
