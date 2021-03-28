@@ -15,6 +15,15 @@ This will launch an install wizard which walk you through the installation proce
 
 <img src="/resources/launch_wizard.png" alt="drawing" width="500"/>
 
+<br/><br/>
+After the installation is complete, you will see an execuable file named "thonny-codelive" on your desktop similiar to the one below.
+
+<img src="/resources/executable.png" alt="drawing" width="500"/>
+
+<br/><br/>
+
+This will serve as an shortcut. Double click this shortcut anytime you wish to run Thonny with the CodeLive exension enabled.
+
 ## User Guide
 
 ## FAQ
