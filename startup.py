@@ -121,13 +121,20 @@ class InstallGUI:
         path = os.path.join(self.target_dir, self.folder_name) # change name
 
         #make shortuct
-        f= open("thonny-codelive","w+")
+        if sys.platform in ('win32', 'cygwin'):
+            f= open("thonny-codelive.sh","w+")
+        else:
+            f= open("thonny-codelive","w+")
+        
         f.close()
 
         #set up short cut
-        shortcut = f=open("thonny-codelive", "a+")
+        
         if sys.platform in ('win32', 'cygwin'):
+            shortcut = f=open("thonny-codelive.sh", "a+")
             shortcut.write('#!/bin/bash')
+        else:
+            shortcut = f=open("thonny-codelive", "a+")
 
         #set enviornment variable
         path_to_plugin = os.path.join(path, self.plugin_name)
@@ -267,12 +274,12 @@ class InstallGUI:
             #clone thonny repo
             path = os.path.join(self.target_dir, self.folder_name)
             os.mkdir(path)
-            os.system("git clone https://github.com/thonny/thonny " + path)
+            os.chdir(path)
+            os.system("git clone https://github.com/thonny/thonny .")
             self.progress['value'] = 25
             self.master.update_idletasks()
             
             #install requirements
-            os.chdir(path)
             os.system("python3 -m " + self.pip_cmd +" install -r requirements.txt")
             
 
@@ -286,15 +293,15 @@ class InstallGUI:
         except PermissionError:
             self.get_root_access()
             os.mkdir(path)
-
-        os.system("git clone https://github.com/codelive-project/codelive " + path)
+        
+        os.chdir(path)
+        os.system("git clone https://github.com/codelive-project/codelive .")
         self.progress['value'] = 75
         self.master.update_idletasks()
 
 
         #install requirements
         os.system(self.pip_cmd + " install paho-mqtt")
-        os.system(self.pip_cmd + " install pyinstaller")
 
         self.progress['value'] = 99
         self.master.update_idletasks()
