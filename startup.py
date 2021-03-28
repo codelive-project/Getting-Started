@@ -156,8 +156,6 @@ class InstallGUI:
         # make short cut executable
         if sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             os.system("chmod +x thonny-codelive")
-        else:
-            os.system("chmod u+x thonny-codelive")
 
         # launch thonny
         os.chdir(path)
