@@ -253,7 +253,7 @@ class InstallGUI:
                         self.python_cmd = 'python'
                         continue
                 if package == 'pip':
-                    ret = os.popen('pip3 --version').read().find('pip 21')
+                    ret = os.popen('pip3 --version').read().find('pip 2')
                     if ret == 0:
                         self.pip_cmd = 'pip3'
                         continue
