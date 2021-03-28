@@ -122,7 +122,7 @@ class InstallGUI:
 
         #make shortuct
         if sys.platform in ('win32', 'cygwin'):
-            f= open("thonny-codelive.sh","w+")
+            f= open("thonny-codelive.bat","w+")
         else:
             f= open("thonny-codelive","w+")
         
@@ -131,10 +131,10 @@ class InstallGUI:
         #set up short cut
         
         if sys.platform in ('win32', 'cygwin'):
-            shortcut = f=open("thonny-codelive.sh", "a+")
-            shortcut.write('#!/bin/bash')
+            shortcut = f=open("thonny-codelive.bat", "a+")
         else:
             shortcut = f=open("thonny-codelive", "a+")
+            shortcut.write('#!/bin/bash \n')
 
         #set enviornment variable
         path_to_plugin = os.path.join(path, self.plugin_name)
@@ -148,7 +148,7 @@ class InstallGUI:
         else:
             shortcut.write(windows_cmd + '\n')
 
-        shortcut.write("cd " + path +'\n')
+        shortcut.write("cd " + self.convert_path_to_widnows(path) +'\n')
         shortcut.write(self.python_cmd + " -m thonny")
         shortcut.close()
         os.system("cat thonny-codelive")
@@ -163,6 +163,11 @@ class InstallGUI:
         os.chdir(path)
         (self.python_cmd + " -m thonny")
 
+    def convert_path_to_widnows(self, path):
+        if sys.platform in ('win32', 'cygwin'):
+            return path.replace("/", "\\")
+        else:
+            return path
     def render_first_page(self):
          #render top lable
         self.top_label = Label(self.master, text="Welcome To CodeLive\n Install Wizard", font= "Helvetica 24 bold")
